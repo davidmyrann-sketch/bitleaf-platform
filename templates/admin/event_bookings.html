@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Påmeldte · {{ event.title }} · Bitleaf{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-0">Påmeldte: {{ event.title }}</h2>
+    <small class="text-muted">{{ bookings|length }} påmeldte</small>
+  </div>
+  <a href="{{ url_for('admin.events') }}" class="btn btn-light border btn-sm">← Events</a>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>Navn</th><th>E-post</th><th>Selskap</th><th>Telefon</th><th>Meny</th><th>Totalt</th><th>Dato</th></tr>
+      </thead>
+      <tbody>
+        {% for b in bookings %}
+        <tr>
+          <td class="fw-semibold">{{ b.name }}</td>
+          <td class="small">{{ b.email }}</td>
+          <td class="small">{{ b.company or '—' }}</td>
+          <td class="small">{{ b.phone or '—' }}</td>
+          <td class="small">
+            {% set items = b.items_json | from_json %}
+            {% for item_id, qty in items.items() %}
+              {{ qty }}× {{ menu_map.get(item_id, item_id) }}<br>
+            {% else %}—{% endfor %}
+          </td>
+          <td class="fw-semibold">{% if b.total_price > 0 %}{{ b.total_price }} kr{% else %}Gratis{% endif %}</td>
+          <td class="small text-muted">{{ b.created_at.strftime('%d.%m.%Y') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

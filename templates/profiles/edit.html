@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% block title %}Rediger profil · Bitleaf{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <h2 class="mb-4"><i class="bi bi-pencil-square text-bl me-2"></i>Rediger profil</h2>
+
+    <form method="post" enctype="multipart/form-data">
+
+      <!-- Personal info -->
+      <div class="card p-4 mb-4">
+        <h5 class="mb-3">Personlig informasjon</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Fullt navn</label>
+            <input name="name" type="text" class="form-control" value="{{ current_user.name or '' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Rolle</label>
+            <select name="role" class="form-select" required>
+              <option value="">Velg rolle...</option>
+              {% for val, label in roles %}
+                <option value="{{ val }}" {% if profile.role == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nisje / Bransje</label>
+            <select name="industry" class="form-select">
+              <option value="">Velg nisje...</option>
+              {% for val, label in industries %}
+                <option value="{{ val }}" {% if profile.industry == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Profilbilde</label>
+            {% if profile.photo_url %}
+              <img src="{{ profile.photo_url }}" class="d-block mb-2 rounded-circle" width="60" height="60" style="object-fit:cover">
+            {% endif %}
+            <input name="photo" type="file" class="form-control" accept="image/*">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Bio</label>
+            <textarea name="bio" class="form-control" rows="4" placeholder="Fortell om deg selv...">{{ profile.bio or '' }}</textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Jeg søker</label>
+            <textarea name="looking_for" class="form-control" rows="3" placeholder="Hva ser du etter i nettverket?">{{ profile.looking_for or '' }}</textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Jeg tilbyr</label>
+            <textarea name="offering" class="form-control" rows="3" placeholder="Hva kan du bidra med?">{{ profile.offering or '' }}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact & links -->
+      <div class="card p-4 mb-4">
+        <h5 class="mb-3">Kontakt og lenker</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Mobilnummer</label>
+            <input name="phone" type="tel" class="form-control" value="{{ profile.phone or '' }}" placeholder="+47...">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Telefon synlig for</label>
+            <select name="phone_visible" class="form-select">
+              {% for val, label in visibility %}
+                <option value="{{ val }}" {% if profile.phone_visible == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">E-post synlig for</label>
+            <select name="email_visible" class="form-select">
+              {% for val, label in visibility %}
+                <option value="{{ val }}" {% if profile.email_visible == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">LinkedIn URL</label>
+            <input name="linkedin_url" type="url" class="form-control" value="{{ profile.linkedin_url or '' }}" placeholder="https://linkedin.com/in/...">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Personlig nettside</label>
+            <input name="website_url" type="url" class="form-control" value="{{ profile.website_url or '' }}" placeholder="https://...">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Video URL (YouTube/Vimeo embed)</label>
+            <input name="video_url" type="url" class="form-control" value="{{ profile.video_url or '' }}" placeholder="https://www.youtube.com/embed/...">
+          </div>
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="is_public" id="isPublic" {% if profile.is_public %}checked{% endif %}>
+              <label class="form-check-label" for="isPublic">Profil er synlig for alle (ikke bare innloggede)</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company -->
+      <div class="card p-4 mb-4">
+        <h5 class="mb-3">Selskapet</h5>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Org.nr (henter info automatisk)</label>
+            <div class="input-group">
+              <input name="org_nr" type="text" class="form-control" id="orgNrInput" value="{{ company.org_nr or '' }}" placeholder="123456789">
+              <button type="button" class="btn btn-bl-outline" id="brregBtn">Hent</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Selskapsnavn</label>
+            <input name="company_name" type="text" class="form-control" id="companyName" value="{{ company.name or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Bransje</label>
+            <input name="company_industry" type="text" class="form-control" id="companyIndustry" value="{{ company.industry or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Stiftet år</label>
+            <input name="founded_year" type="number" class="form-control" id="foundedYear" value="{{ company.founded_year or '' }}" placeholder="2020">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Antall ansatte</label>
+            <input name="employees" type="text" class="form-control" id="employees" value="{{ company.employees or '' }}" placeholder="1-10">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Selskapets nettside</label>
+            <input name="company_website" type="url" class="form-control" value="{{ company.website or '' }}" placeholder="https://...">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Adresse</label>
+            <input name="address" type="text" class="form-control" id="companyAddress" value="{{ company.address or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Logo</label>
+            {% if company.logo_url %}
+              <img src="{{ company.logo_url }}" class="d-block mb-2 rounded" width="60" height="60" style="object-fit:contain;background:#f5f5f5">
+            {% endif %}
+            <input name="logo" type="file" class="form-control" accept="image/*">
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end">
+        {% if profile.slug %}
+          <a href="{{ url_for('profiles.detail', slug=profile.slug) }}" class="btn btn-light border">Avbryt</a>
+        {% endif %}
+        <button type="submit" class="btn btn-bl px-4">Lagre profil</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('brregBtn').addEventListener('click', function() {
+  const orgNr = document.getElementById('orgNrInput').value.replace(/\D/g, '');
+  if (!orgNr) return;
+  fetch(`/api/brreg/${orgNr}`)
+    .then(r => r.json())
+    .then(d => {
+      if (d.error) { alert('Fant ikke organisasjonen.'); return; }
+      if (d.name)         document.getElementById('companyName').value     = d.name;
+      if (d.industry)     document.getElementById('companyIndustry').value = d.industry;
+      if (d.founded_year) document.getElementById('foundedYear').value     = d.founded_year;
+      if (d.employees)    document.getElementById('employees').value       = d.employees;
+      if (d.address)      document.getElementById('companyAddress').value  = d.address;
+    })
+    .catch(() => alert('Feil ved oppslag.'));
+});
+</script>
+{% endblock %}

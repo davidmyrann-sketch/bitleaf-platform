@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}{% if event %}Rediger event{% else %}Nytt event{% endif %} · Admin · Bitleaf{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">{% if event %}Rediger event{% else %}Nytt event{% endif %}</h2>
+      <a href="{{ url_for('admin.events') }}" class="btn btn-light border btn-sm">← Events</a>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      <div class="card p-4 mb-4">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Tittel*</label>
+            <input name="title" type="text" class="form-control" value="{{ event.title if event else '' }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Dato og tid</label>
+            <input name="date" type="datetime-local" class="form-control"
+              value="{{ event.date.strftime('%Y-%m-%dT%H:%M') if event and event.date else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Sted</label>
+            <input name="location" type="text" class="form-control" value="{{ event.location if event else '' }}" placeholder="f.eks. Bitleaf HQ, Oslo">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Adresse</label>
+            <input name="address" type="text" class="form-control" value="{{ event.address if event else '' }}">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Beskrivelse</label>
+            <textarea name="description" class="form-control" rows="5">{{ event.description if event else '' }}</textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Kapasitet</label>
+            <input name="capacity" type="number" class="form-control" value="{{ event.capacity if event else 50 }}" min="1">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Pris (kr, 0 = gratis)</label>
+            <input name="price" type="number" class="form-control" value="{{ event.price if event else 0 }}" min="0">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label d-block">Status</label>
+            <div class="form-check form-switch mt-2">
+              <input class="form-check-input" type="checkbox" name="is_active" id="isActive" {% if not event or event.is_active %}checked{% endif %}>
+              <label class="form-check-label" for="isActive">Aktiv</label>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Banner-bilde</label>
+            {% if event and event.banner_url %}
+              <img src="{{ event.banner_url }}" class="d-block mb-2 rounded" style="height:120px;object-fit:cover">
+            {% endif %}
+            <input name="banner" type="file" class="form-control" accept="image/*">
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4 mb-4">
+        <h5 class="mb-3">Meny (valgfritt)</h5>
+        <div id="menuItems">
+          {% set menu = event.menu_json | from_json if event and event.menu_json else [] %}
+          {% for item in menu %}
+          <div class="row g-2 mb-2 menu-row">
+            <div class="col-7"><input name="menu_name[]" type="text" class="form-control form-control-sm" placeholder="Rettens navn" value="{{ item.name }}"></div>
+            <div class="col-3"><input name="menu_price[]" type="number" class="form-control form-control-sm" placeholder="Pris" value="{{ item.price }}"></div>
+            <div class="col-2"><button type="button" class="btn btn-sm btn-outline-danger remove-row">×</button></div>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="button" class="btn btn-light border btn-sm mt-2" id="addMenuItem">+ Legg til rett</button>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="{{ url_for('admin.events') }}" class="btn btn-light border">Avbryt</a>
+        <button type="submit" class="btn btn-bl px-4">Lagre</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('addMenuItem').addEventListener('click', function() {
+  const row = `<div class="row g-2 mb-2 menu-row">
+    <div class="col-7"><input name="menu_name[]" type="text" class="form-control form-control-sm" placeholder="Rettens navn"></div>
+    <div class="col-3"><input name="menu_price[]" type="number" class="form-control form-control-sm" placeholder="Pris" value="0"></div>
+    <div class="col-2"><button type="button" class="btn btn-sm btn-outline-danger remove-row">×</button></div>
+  </div>`;
+  document.getElementById('menuItems').insertAdjacentHTML('beforeend', row);
+});
+document.getElementById('menuItems').addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-row')) {
+    e.target.closest('.menu-row').remove();
+  }
+});
+</script>
+{% endblock %}

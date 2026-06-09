@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Samtale med {{ partner.name or partner.email }} · Bitleaf{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="{{ url_for('messages.inbox') }}" class="btn btn-light btn-sm border"><i class="bi bi-arrow-left"></i></a>
+  {% if partner.profile and partner.profile.photo_url %}
+    <img src="{{ partner.profile.photo_url }}" class="rounded-circle" width="44" height="44" style="object-fit:cover">
+  {% else %}
+    <div class="avatar-placeholder" style="width:44px;height:44px;font-size:1.1rem">{{ (partner.name or partner.email)[0].upper() }}</div>
+  {% endif %}
+  <div>
+    <div class="fw-semibold">{{ partner.name or partner.email }}</div>
+    {% if partner.profile and partner.profile.slug %}
+      <a href="{{ url_for('profiles.detail', slug=partner.profile.slug) }}" class="small text-muted">Se profil</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card p-3 mb-3" style="min-height:400px;max-height:60vh;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem" id="msgContainer">
+  {% for m in messages %}
+    {% set is_me = m.from_user_id == current_user.id %}
+    <div class="d-flex {% if is_me %}justify-content-end{% else %}justify-content-start{% endif %}">
+      <div class="px-3 py-2 {% if is_me %}msg-bubble-me{% else %}msg-bubble-other{% endif %}">
+        <div style="white-space:pre-wrap">{{ m.body }}</div>
+        <div class="small opacity-75 mt-1 text-end">{{ m.created_at.strftime('%d.%m %H:%M') }}</div>
+      </div>
+    </div>
+  {% else %}
+    <div class="text-center text-muted my-auto">Start samtalen!</div>
+  {% endfor %}
+</div>
+
+<form method="post" class="d-flex gap-2">
+  <textarea name="body" class="form-control" rows="2" placeholder="Skriv melding..." required style="resize:none"></textarea>
+  <button type="submit" class="btn btn-bl align-self-end px-4">
+    <i class="bi bi-send"></i>
+  </button>
+</form>
+
+{% endblock %}
+{% block scripts %}
+<script>
+  const c = document.getElementById('msgContainer');
+  if (c) c.scrollTop = c.scrollHeight;
+</script>
+{% endblock %}

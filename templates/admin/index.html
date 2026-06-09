@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Admin · Bitleaf{% endblock %}
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-gear text-bl me-2"></i>Admin</h2>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card p-3 text-center">
+      <div class="fs-2 fw-bold text-bl">{{ users_count }}</div>
+      <div class="text-muted small">Brukere</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 text-center">
+      <div class="fs-2 fw-bold text-bl">{{ profiles_count }}</div>
+      <div class="text-muted small">Profiler</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 text-center">
+      <div class="fs-2 fw-bold text-bl">{{ events_count }}</div>
+      <div class="text-muted small">Events</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card p-3 text-center">
+      <div class="fs-2 fw-bold text-bl">{{ bookings_count }}</div>
+      <div class="text-muted small">Påmeldinger</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Siste brukere</h5>
+        <a href="{{ url_for('admin.users') }}" class="btn btn-bl-outline btn-sm">Se alle</a>
+      </div>
+      <div class="list-group list-group-flush">
+        {% for u in recent_users %}
+        <div class="list-group-item px-0 py-2 d-flex justify-content-between">
+          <div>
+            <div class="fw-semibold small">{{ u.name or u.email }}</div>
+            <div class="text-muted" style="font-size:.75rem">{{ u.email }} · {{ u.created_at.strftime('%d.%m.%Y') }}</div>
+          </div>
+          {% if u.is_admin %}<span class="badge bg-warning text-dark">Admin</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Events</h5>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('admin.new_event') }}" class="btn btn-bl btn-sm">+ Nytt</a>
+          <a href="{{ url_for('admin.events') }}" class="btn btn-bl-outline btn-sm">Se alle</a>
+        </div>
+      </div>
+      <a href="{{ url_for('admin.users') }}" class="btn btn-light border w-100 mb-2">
+        <i class="bi bi-people me-2"></i>Administrer brukere
+      </a>
+      <a href="{{ url_for('admin.events') }}" class="btn btn-light border w-100">
+        <i class="bi bi-calendar-event me-2"></i>Administrer events
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

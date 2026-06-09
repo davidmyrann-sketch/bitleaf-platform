@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}{{ profile.display_name }} · Bitleaf{% endblock %}
+{% block content %}
+
+<div class="row g-4">
+  <!-- Left column -->
+  <div class="col-lg-4">
+    <div class="card p-4 text-center">
+      {% if profile.photo_url %}
+        <img src="{{ profile.photo_url }}" class="rounded-circle mx-auto mb-3" width="120" height="120" style="object-fit:cover;border:4px solid var(--bl-accent)">
+      {% else %}
+        <div class="avatar-placeholder mx-auto mb-3" style="width:120px;height:120px;font-size:2.5rem">{{ (profile.display_name or '?')[0].upper() }}</div>
+      {% endif %}
+
+      <h1 class="h4 mb-1">{{ profile.display_name }}</h1>
+
+      <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+        {% if profile.role %}
+          <span class="badge-role">{{ profile.role_label }}</span>
+        {% endif %}
+        {% if profile.industry %}
+          <span class="badge-industry">{{ profile.industry_label }}</span>
+        {% endif %}
+      </div>
+
+      {% if profile.company and profile.company.name %}
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+          {% if profile.company.logo_url %}
+            <img src="{{ profile.company.logo_url }}" width="36" height="36" style="object-fit:contain;border-radius:6px">
+          {% endif %}
+          <span class="fw-semibold">{{ profile.company.name }}</span>
+        </div>
+      {% endif %}
+
+      <!-- Contact info -->
+      <div class="d-grid gap-2 mt-2">
+        {% if show_phone and profile.phone %}
+          <a href="tel:{{ profile.phone }}" class="btn btn-bl-outline btn-sm">
+            <i class="bi bi-telephone me-1"></i>{{ profile.phone }}
+          </a>
+        {% endif %}
+        {% if show_email %}
+          <a href="mailto:{{ profile.user.email }}" class="btn btn-bl-outline btn-sm">
+            <i class="bi bi-envelope me-1"></i>E-post
+          </a>
+        {% endif %}
+        {% if profile.linkedin_url %}
+          <a href="{{ profile.linkedin_url }}" target="_blank" rel="noopener" class="btn btn-light btn-sm border">
+            <i class="bi bi-linkedin me-1" style="color:#0A66C2"></i>LinkedIn
+          </a>
+        {% endif %}
+        {% if profile.website_url %}
+          <a href="{{ profile.website_url }}" target="_blank" rel="noopener" class="btn btn-light btn-sm border">
+            <i class="bi bi-globe me-1"></i>Nettside
+          </a>
+        {% endif %}
+      </div>
+
+      {% if current_user.is_authenticated and current_user.id != profile.user_id %}
+      <hr>
+      <button class="btn btn-bl btn-sm" data-bs-toggle="modal" data-bs-target="#msgModal">
+        <i class="bi bi-chat-dots me-1"></i>Send melding
+      </button>
+      {% endif %}
+
+      {% if current_user.is_authenticated and current_user.id == profile.user_id %}
+      <hr>
+      <a href="{{ url_for('profiles.edit_profile') }}" class="btn btn-bl-outline btn-sm">
+        <i class="bi bi-pencil me-1"></i>Rediger profil
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div class="col-lg-8">
+    {% if profile.bio %}
+    <div class="card p-4 mb-3">
+      <h5 class="mb-2"><i class="bi bi-person-lines-fill text-bl me-2"></i>Om meg</h5>
+      <p class="mb-0" style="white-space:pre-wrap">{{ profile.bio }}</p>
+    </div>
+    {% endif %}
+
+    <div class="row g-3">
+      {% if profile.looking_for %}
+      <div class="col-md-6">
+        <div class="card p-4 h-100">
+          <h6 class="text-bl mb-2"><i class="bi bi-search me-1"></i>Jeg søker</h6>
+          <p class="mb-0 small" style="white-space:pre-wrap">{{ profile.looking_for }}</p>
+        </div>
+      </div>
+      {% endif %}
+      {% if profile.offering %}
+      <div class="col-md-6">
+        <div class="card p-4 h-100">
+          <h6 class="text-bl mb-2"><i class="bi bi-gift me-1"></i>Jeg tilbyr</h6>
+          <p class="mb-0 small" style="white-space:pre-wrap">{{ profile.offering }}</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if profile.video_url %}
+    <div class="card p-4 mt-3">
+      <h5 class="mb-3"><i class="bi bi-play-circle text-bl me-2"></i>Video</h5>
+      <div class="ratio ratio-16x9">
+        <iframe src="{{ profile.video_url }}" allowfullscreen></iframe>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if profile.company and profile.company.name %}
+    <div class="card p-4 mt-3">
+      <h5 class="mb-3"><i class="bi bi-building text-bl me-2"></i>Selskapet</h5>
+      <div class="row g-2 small">
+        {% if profile.company.org_nr %}
+        <div class="col-6"><span class="text-muted">Org.nr:</span> {{ profile.company.org_nr }}</div>
+        {% endif %}
+        {% if profile.company.founded_year %}
+        <div class="col-6"><span class="text-muted">Stiftet:</span> {{ profile.company.founded_year }}</div>
+        {% endif %}
+        {% if profile.company.employees %}
+        <div class="col-6"><span class="text-muted">Ansatte:</span> {{ profile.company.employees }}</div>
+        {% endif %}
+        {% if profile.company.industry %}
+        <div class="col-6"><span class="text-muted">Bransje:</span> {{ profile.company.industry }}</div>
+        {% endif %}
+        {% if profile.company.address %}
+        <div class="col-12"><span class="text-muted">Adresse:</span> {{ profile.company.address }}</div>
+        {% endif %}
+        {% if profile.company.website %}
+        <div class="col-12">
+          <a href="{{ profile.company.website }}" target="_blank" rel="noopener" class="btn btn-light btn-sm border mt-1">
+            <i class="bi bi-globe me-1"></i>{{ profile.company.website }}
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Message modal -->
+{% if current_user.is_authenticated and current_user.id != profile.user_id %}
+<div class="modal fade" id="msgModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Melding til {{ profile.display_name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ url_for('messages.send_from_profile', to_user_id=profile.user_id) }}" method="post">
+        <div class="modal-body">
+          <textarea name="body" class="form-control" rows="5" placeholder="Skriv melding..." required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Avbryt</button>
+          <button type="submit" class="btn btn-bl">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
