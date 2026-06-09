@@ -48,7 +48,6 @@ class User(UserMixin, db.Model):
     google_id     = db.Column(db.String(255), unique=True)
     avatar_url    = db.Column(db.Text)
     is_admin      = db.Column(db.Boolean, default=False)
-    preferred_lang = db.Column(db.String(10), default='no')
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
     profile       = db.relationship('Profile', backref='user', uselist=False)

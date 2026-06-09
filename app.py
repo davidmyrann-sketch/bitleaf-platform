@@ -69,10 +69,7 @@ def create_app():
         allowed = ['no','en','fr','de','es','pt','pl','uk','ar','zh','ja','ko','hi','nl','sv','da','fi']
         if lang in allowed:
             session['lang'] = lang
-            if current_user.is_authenticated:
-                current_user.preferred_lang = lang
-                from models import db
-                db.session.commit()
+            session.permanent = True
         return redirect(_r.referrer or '/')
 
     @app.template_filter('from_json')
