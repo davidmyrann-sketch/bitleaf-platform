@@ -1,10 +1,12 @@
 import os
 from flask import Flask
 from flask_login import LoginManager
+from werkzeug.middleware.proxy_fix import ProxyFix
 from models import db, User
 
 def create_app():
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-bitleaf-2026')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///bitleaf.db')
