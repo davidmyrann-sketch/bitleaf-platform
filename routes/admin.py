@@ -153,6 +153,17 @@ def _save_event(event):
     return redirect(url_for('admin.events'))
 
 
+@admin_bp.route('/events/<int:event_id>/slett', methods=['POST'])
+@admin_required
+def delete_event(event_id):
+    event = Event.query.get_or_404(event_id)
+    event.bookings.delete()
+    db.session.delete(event)
+    db.session.commit()
+    flash(f'"{event.title}" er slettet.', 'success')
+    return redirect(url_for('admin.events'))
+
+
 @admin_bp.route('/events/<int:event_id>/pameldte')
 @admin_required
 def event_bookings(event_id):

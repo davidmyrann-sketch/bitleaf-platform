@@ -32,9 +32,12 @@
             </span>
           </td>
           <td>
-            <div class="d-flex gap-1">
+            <div class="d-flex gap-1 flex-wrap">
               <a href="{{ url_for('admin.edit_event', event_id=e.id) }}" class="btn btn-sm btn-light border">Rediger</a>
               <a href="{{ url_for('admin.event_bookings', event_id=e.id) }}" class="btn btn-sm btn-bl-outline">Påmeldte</a>
+              <form method="post" action="{{ url_for('admin.delete_event', event_id=e.id) }}" onsubmit="return confirm('Slett «{{ e.title }}»?')">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Slett</button>
+              </form>
             </div>
           </td>
         </tr>
