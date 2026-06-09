@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Bitleaf{% endblock %}</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon-180.png') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,8 +16,9 @@
 
 <nav class="navbar navbar-expand-lg navbar-bl sticky-top">
   <div class="container">
-    <a class="navbar-brand fw-bold fs-4" href="{{ url_for('profiles.directory') }}" style="letter-spacing:-.5px">
-      Bitleaf
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('profiles.directory') }}">
+      <img src="{{ url_for('static', filename='logo-icon.png') }}" height="36" width="36" alt="Bitleaf">
+      <span class="fw-bold fs-5" style="letter-spacing:-.3px">Bitleaf</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
       <span class="navbar-toggler-icon"></span>
