@@ -41,7 +41,40 @@ def create_app():
     app.register_blueprint(events_bp)
     app.register_blueprint(admin_bp)
 
-    import json as _json
+    import requests as _req, json as _json
+
+    @app.route('/api/translate', methods=['POST'])
+    def translate_text():
+        from flask import request as _r, jsonify, session
+        data   = _r.get_json()
+        text   = (data or {}).get('text', '').strip()
+        target = (data or {}).get('target', 'no')
+        if not text:
+            return jsonify({'translated': ''})
+        try:
+            r = _req.get(
+                'https://api.mymemory.translated.net/get',
+                params={'q': text[:500], 'langpair': f'autodetect|{target}'},
+                timeout=5
+            )
+            translated = r.json()['responseData']['translatedText']
+            return jsonify({'translated': translated})
+        except Exception:
+            return jsonify({'translated': text})
+
+    @app.route('/set-lang/<lang>')
+    def set_lang(lang):
+        from flask import session, redirect, request as _r
+        from flask_login import current_user
+        allowed = ['no','en','fr','de','es','pt','pl','uk','ar','zh','ja','ko','hi','nl','sv','da','fi']
+        if lang in allowed:
+            session['lang'] = lang
+            if current_user.is_authenticated:
+                current_user.preferred_lang = lang
+                from models import db
+                db.session.commit()
+        return redirect(_r.referrer or '/')
+
     @app.template_filter('from_json')
     def from_json_filter(s):
         try:

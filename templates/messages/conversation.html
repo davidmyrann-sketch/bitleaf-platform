@@ -22,8 +22,18 @@
     {% set is_me = m.from_user_id == current_user.id %}
     <div class="d-flex {% if is_me %}justify-content-end{% else %}justify-content-start{% endif %}">
       <div class="px-3 py-2 {% if is_me %}msg-bubble-me{% else %}msg-bubble-other{% endif %}">
-        <div style="white-space:pre-wrap">{{ m.body }}</div>
-        <div class="small opacity-75 mt-1 text-end">{{ m.created_at.strftime('%d.%m %H:%M') }}</div>
+        <div class="msg-text" style="white-space:pre-wrap">{{ m.body }}</div>
+        <div class="d-flex justify-content-between align-items-center gap-2 mt-1">
+          <small class="opacity-60" style="font-size:.7rem">{{ m.created_at.strftime('%d.%m %H:%M') }}</small>
+          {% if not is_me %}
+          <button class="btn btn-link p-0 translate-btn opacity-60"
+            style="font-size:.7rem;color:inherit;text-decoration:none"
+            data-text="{{ m.body | e }}"
+            data-target="{{ session.get('lang', 'no') }}">
+            <i class="bi bi-translate"></i>
+          </button>
+          {% endif %}
+        </div>
       </div>
     </div>
   {% else %}
@@ -43,5 +53,35 @@
 <script>
   const c = document.getElementById('msgContainer');
   if (c) c.scrollTop = c.scrollHeight;
+
+  document.querySelectorAll('.translate-btn').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      const textEl = this.closest('.px-3').querySelector('.msg-text');
+      const original = this.dataset.text;
+      const target = this.dataset.target || 'no';
+
+      if (this.dataset.translated === '1') {
+        textEl.textContent = original;
+        this.dataset.translated = '0';
+        this.innerHTML = '<i class="bi bi-translate"></i>';
+        return;
+      }
+
+      this.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+      try {
+        const res = await fetch('/api/translate', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({text: original, target})
+        });
+        const data = await res.json();
+        textEl.textContent = data.translated;
+        this.dataset.translated = '1';
+        this.innerHTML = '<i class="bi bi-translate"></i> <small>original</small>';
+      } catch(e) {
+        this.innerHTML = '<i class="bi bi-translate"></i>';
+      }
+    });
+  });
 </script>
 {% endblock %}
