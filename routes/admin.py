@@ -85,38 +85,52 @@ def edit_event(event_id):
 
 
 def _save_event(event):
+    import re
     _init_cloudinary()
     is_new = event is None
-    if is_new:
-        event = Event()
-        db.session.add(event)
 
-    event.title       = request.form.get('title', '').strip()
-    event.description = request.form.get('description', '').strip()
-    event.location    = request.form.get('location', '').strip()
-    event.address     = request.form.get('address', '').strip()
-    event.capacity    = int(request.form.get('capacity', 50))
-    event.price       = int(request.form.get('price', 0))
-    event.is_active   = request.form.get('is_active') == 'on'
+    title       = request.form.get('title', '').strip()
+    description = request.form.get('description', '').strip()
+    location    = request.form.get('location', '').strip()
+    address     = request.form.get('address', '').strip()
+    capacity    = int(request.form.get('capacity', 50))
+    price       = int(request.form.get('price', 0))
+    is_active   = request.form.get('is_active') == 'on'
 
     date_str = request.form.get('date', '').strip()
-    if date_str:
-        event.date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M')
+    event_date = datetime.strptime(date_str, '%Y-%m-%dT%H:%M') if date_str else None
 
-    # Slug
-    if not event.slug or is_new:
-        base = event.title.lower()
-        import re
+    # Generate slug before adding to session to avoid autoflush collision
+    if is_new or not event.slug:
+        base = title.lower()
         base = re.sub(r'[æÆ]', 'ae', base)
         base = re.sub(r'[øØ]', 'o', base)
         base = re.sub(r'[åÅ]', 'a', base)
         base = re.sub(r'[^a-z0-9]+', '-', base).strip('-')[:60]
         slug = base
         n = 1
-        while Event.query.filter(Event.slug == slug, Event.id != (event.id or -1)).first():
+        existing_id = event.id if not is_new else -1
+        while Event.query.filter(Event.slug == slug, Event.id != existing_id).first():
             slug = f'{base}-{n}'
             n += 1
+    else:
+        slug = event.slug
+
+    if is_new:
+        event = Event(slug=slug)
+        db.session.add(event)
+    else:
         event.slug = slug
+
+    event.title       = title
+    event.description = description
+    event.location    = location
+    event.address     = address
+    event.capacity    = capacity
+    event.price       = price
+    event.is_active   = is_active
+    if event_date:
+        event.date    = event_date
 
     # Menu JSON
     menu_items = []
