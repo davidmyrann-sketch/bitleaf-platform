@@ -13,7 +13,7 @@ ROLES = [
     ('startup',         'Startup'),
     ('scaleup',         'Scale-up'),
     ('mature',          'Modent selskap'),
-    ('sweet_equity',    'Sweet Equity'),
+    ('sweat_investor',  'Sweat Investor'),
 ]
 
 VISIBILITY = [
@@ -35,7 +35,7 @@ INDUSTRIES = [
     ('legal',        'Juridisk'),
     ('restaurant',   'Restaurant & Mat'),
     ('real_estate',  'Eiendom'),
-    ('startups_general', 'Startups in general'),
+    ('startups',         'Startups'),
     ('other',        'Annet'),
 ]
 
