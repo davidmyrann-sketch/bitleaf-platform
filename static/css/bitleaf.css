@@ -78,6 +78,8 @@ body {
   border: none;
   border-radius: 12px;
   box-shadow: 0 1px 6px rgba(61,8,8,.1);
+  overflow: hidden;
+  min-width: 0;
 }
 .card:hover {
   box-shadow: 0 4px 16px rgba(245,160,0,.2);
@@ -252,6 +254,11 @@ a:hover { color: var(--bl-maroon-mid); }
 .badge.bg-success { background: var(--bl-green) !important; color: var(--bl-text-dark) !important; }
 
 @media (max-width: 576px) {
-  .hero-bl { padding: 2.5rem 1rem; }
+  .hero-bl { padding: 2rem .75rem; }
   .event-banner { height: 180px; }
+  .profile-card .avatar { width: 56px; height: 56px; }
+  .msg-bubble-me, .msg-bubble-other { max-width: 88%; }
+  .navbar-bl .nav-link { padding: .4rem 0; }
+  .container { padding-left: .75rem; padding-right: .75rem; }
+  h1.h2 { font-size: 1.4rem; }
 }
