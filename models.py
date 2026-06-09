@@ -58,7 +58,7 @@ class Profile(db.Model):
     id              = db.Column(db.Integer, primary_key=True)
     user_id         = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
     slug            = db.Column(db.String(255), unique=True)
-    role            = db.Column(db.String(50))
+    role            = db.Column(db.Text)  # comma-separated, e.g. "founder,angel_investor"
     bio             = db.Column(db.Text)
     photo_url       = db.Column(db.Text)
     phone           = db.Column(db.String(50))
@@ -69,7 +69,7 @@ class Profile(db.Model):
     video_url       = db.Column(db.Text)
     looking_for     = db.Column(db.Text)
     offering        = db.Column(db.Text)
-    industry        = db.Column(db.String(50))
+    industry        = db.Column(db.Text)  # comma-separated
     is_public       = db.Column(db.Boolean, default=True)
     membership_tier = db.Column(db.String(20), default='free')
     created_at      = db.Column(db.DateTime, default=datetime.utcnow)
@@ -82,12 +82,22 @@ class Profile(db.Model):
         return self.user.name if self.user else ''
 
     @property
+    def roles_list(self):
+        return [r.strip() for r in (self.role or '').split(',') if r.strip()]
+
+    @property
+    def industries_list(self):
+        return [i.strip() for i in (self.industry or '').split(',') if i.strip()]
+
+    @property
     def role_label(self):
-        return dict(ROLES).get(self.role, self.role or '')
+        role_map = dict(ROLES)
+        return ', '.join(role_map.get(r, r) for r in self.roles_list) or ''
 
     @property
     def industry_label(self):
-        return dict(INDUSTRIES).get(self.industry, self.industry or '')
+        ind_map = dict(INDUSTRIES)
+        return ', '.join(ind_map.get(i, i) for i in self.industries_list) or ''
 
     def make_slug(self, name):
         s = name.lower().strip()

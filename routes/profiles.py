@@ -56,9 +56,9 @@ def directory():
             db.or_(User.name.ilike(like), Profile.bio.ilike(like), Profile.looking_for.ilike(like))
         )
     if role:
-        query = query.filter(Profile.role == role)
+        query = query.filter(Profile.role.ilike(f'%{role}%'))
     if industry:
-        query = query.filter(Profile.industry == industry)
+        query = query.filter(Profile.industry.ilike(f'%{industry}%'))
 
     profiles = query.order_by(Profile.updated_at.desc()).paginate(page=page, per_page=20, error_out=False)
     return render_template('profiles/directory.html',
@@ -80,7 +80,8 @@ def detail(slug):
         (profile.email_visible == 'members' and current_user.is_authenticated)
     )
     return render_template('profiles/detail.html',
-        profile=profile, show_phone=show_phone, show_email=show_email)
+        profile=profile, show_phone=show_phone, show_email=show_email,
+        roles=dict(ROLES), industries=dict(INDUSTRIES))
 
 
 @profiles_bp.route('/min-profil', methods=['GET', 'POST'])
@@ -103,7 +104,7 @@ def edit_profile():
         current_user.name = request.form.get('name', current_user.name).strip()
 
         # Profile fields
-        profile.role          = request.form.get('role', '')
+        profile.role          = ','.join(request.form.getlist('role'))
         profile.bio           = request.form.get('bio', '')
         profile.phone         = request.form.get('phone', '')
         profile.phone_visible = request.form.get('phone_visible', 'members')
@@ -113,7 +114,7 @@ def edit_profile():
         profile.video_url     = request.form.get('video_url', '')
         profile.looking_for   = request.form.get('looking_for', '')
         profile.offering      = request.form.get('offering', '')
-        profile.industry      = request.form.get('industry', '')
+        profile.industry      = ','.join(request.form.getlist('industry'))
         profile.is_public     = request.form.get('is_public') == 'on'
 
         if not profile.slug:

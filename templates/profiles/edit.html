@@ -17,22 +17,28 @@
             <input name="name" type="text" class="form-control" value="{{ current_user.name or '' }}" required>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Rolle</label>
-            <select name="role" class="form-select" required>
-              <option value="">Velg rolle...</option>
+            <label class="form-label fw-semibold">Rolle <small class="text-muted fw-normal">(velg én eller flere)</small></label>
+            <div class="border rounded p-3" style="max-height:220px;overflow-y:auto">
               {% for val, label in roles %}
-                <option value="{{ val }}" {% if profile.role == val %}selected{% endif %}>{{ label }}</option>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="role" value="{{ val }}" id="role_{{ val }}"
+                  {% if val in profile.roles_list %}checked{% endif %}>
+                <label class="form-check-label" for="role_{{ val }}">{{ label }}</label>
+              </div>
               {% endfor %}
-            </select>
+            </div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Nisje / Bransje</label>
-            <select name="industry" class="form-select">
-              <option value="">Velg nisje...</option>
+            <label class="form-label fw-semibold">Nisje / Bransje <small class="text-muted fw-normal">(velg én eller flere)</small></label>
+            <div class="border rounded p-3" style="max-height:220px;overflow-y:auto">
               {% for val, label in industries %}
-                <option value="{{ val }}" {% if profile.industry == val %}selected{% endif %}>{{ label }}</option>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="industry" value="{{ val }}" id="ind_{{ val }}"
+                  {% if val in profile.industries_list %}checked{% endif %}>
+                <label class="form-check-label" for="ind_{{ val }}">{{ label }}</label>
+              </div>
               {% endfor %}
-            </select>
+            </div>
           </div>
           <div class="col-md-6">
             <label class="form-label">Profilbilde</label>

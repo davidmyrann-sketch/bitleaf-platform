@@ -15,12 +15,8 @@
       <h1 class="h4 mb-1">{{ profile.display_name }}</h1>
 
       <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
-        {% if profile.role %}
-          <span class="badge-role">{{ profile.role_label }}</span>
-        {% endif %}
-        {% if profile.industry %}
-          <span class="badge-industry">{{ profile.industry_label }}</span>
-        {% endif %}
+        {% for r in profile.roles_list %}<span class="badge-role">{{ roles.get(r, r) }}</span>{% endfor %}
+        {% for i in profile.industries_list %}<span class="badge-industry">{{ industries.get(i, i) }}</span>{% endfor %}
       </div>
 
       {% if profile.company and profile.company.name %}

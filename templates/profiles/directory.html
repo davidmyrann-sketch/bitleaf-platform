@@ -60,12 +60,8 @@
               <div class="flex-grow-1 min-w-0">
                 <div class="fw-semibold text-truncate">{{ profile.display_name }}</div>
                 <div class="d-flex flex-wrap gap-1 mt-1">
-                  {% if profile.role %}
-                    <span class="badge-role">{{ profile.role_label }}</span>
-                  {% endif %}
-                  {% if profile.industry %}
-                    <span class="badge-industry">{{ profile.industry_label }}</span>
-                  {% endif %}
+                  {% for r in profile.roles_list %}<span class="badge-role">{{ dict(roles).get(r, r) }}</span>{% endfor %}
+                  {% for i in profile.industries_list %}<span class="badge-industry">{{ dict(industries).get(i, i) }}</span>{% endfor %}
                 </div>
                 {% if profile.company and profile.company.name %}
                   <div class="text-muted small mt-1 text-truncate">
