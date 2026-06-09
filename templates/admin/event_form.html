@@ -58,18 +58,25 @@
       </div>
 
       <div class="card p-4 mb-4">
-        <h5 class="mb-3">Meny (valgfritt)</h5>
+        <h5 class="mb-2">Meny</h5>
+        <p class="text-muted small mb-3">Legg til mat- og drikkealternativer. Gjesten velger 1 av hvert. Alt er inkludert i eventets fastpris.</p>
         <div id="menuItems">
           {% set menu = event.menu_json | from_json if event and event.menu_json else [] %}
           {% for item in menu %}
-          <div class="row g-2 mb-2 menu-row">
-            <div class="col-7"><input name="menu_name[]" type="text" class="form-control form-control-sm" placeholder="Rettens navn" value="{{ item.name }}"></div>
-            <div class="col-3"><input name="menu_price[]" type="number" class="form-control form-control-sm" placeholder="Pris" value="{{ item.price }}"></div>
-            <div class="col-2"><button type="button" class="btn btn-sm btn-outline-danger remove-row">×</button></div>
+          <div class="row g-2 mb-2 menu-row align-items-start">
+            <div class="col-3">
+              <select name="menu_type[]" class="form-select form-select-sm">
+                <option value="food" {% if item.get('type') == 'food' %}selected{% endif %}>🍽 Mat</option>
+                <option value="drink" {% if item.get('type') == 'drink' %}selected{% endif %}>🥂 Drikke</option>
+              </select>
+            </div>
+            <div class="col-4"><input name="menu_name[]" type="text" class="form-control form-control-sm" placeholder="Navn" value="{{ item.name }}"></div>
+            <div class="col-4"><input name="menu_desc[]" type="text" class="form-control form-control-sm" placeholder="Beskrivelse" value="{{ item.get('description', '') }}"></div>
+            <div class="col-1"><button type="button" class="btn btn-sm btn-outline-danger remove-row">×</button></div>
           </div>
           {% endfor %}
         </div>
-        <button type="button" class="btn btn-light border btn-sm mt-2" id="addMenuItem">+ Legg til rett</button>
+        <button type="button" class="btn btn-light border btn-sm mt-2" id="addMenuItem">+ Legg til alternativ</button>
       </div>
 
       <div class="d-flex gap-2 justify-content-end">
@@ -83,10 +90,16 @@
 {% block scripts %}
 <script>
 document.getElementById('addMenuItem').addEventListener('click', function() {
-  const row = `<div class="row g-2 mb-2 menu-row">
-    <div class="col-7"><input name="menu_name[]" type="text" class="form-control form-control-sm" placeholder="Rettens navn"></div>
-    <div class="col-3"><input name="menu_price[]" type="number" class="form-control form-control-sm" placeholder="Pris" value="0"></div>
-    <div class="col-2"><button type="button" class="btn btn-sm btn-outline-danger remove-row">×</button></div>
+  const row = `<div class="row g-2 mb-2 menu-row align-items-start">
+    <div class="col-3">
+      <select name="menu_type[]" class="form-select form-select-sm">
+        <option value="food">🍽 Mat</option>
+        <option value="drink">🥂 Drikke</option>
+      </select>
+    </div>
+    <div class="col-4"><input name="menu_name[]" type="text" class="form-control form-control-sm" placeholder="Navn"></div>
+    <div class="col-4"><input name="menu_desc[]" type="text" class="form-control form-control-sm" placeholder="Beskrivelse"></div>
+    <div class="col-1"><button type="button" class="btn btn-sm btn-outline-danger remove-row">×</button></div>
   </div>`;
   document.getElementById('menuItems').insertAdjacentHTML('beforeend', row);
 });

@@ -135,11 +135,12 @@ def _save_event(event):
     # Menu JSON
     menu_items = []
     names  = request.form.getlist('menu_name[]')
-    prices = request.form.getlist('menu_price[]')
-    for i, (n, p) in enumerate(zip(names, prices)):
+    descs  = request.form.getlist('menu_desc[]')
+    types  = request.form.getlist('menu_type[]')
+    for i, (n, d, t) in enumerate(zip(names, descs, types)):
         n = n.strip()
         if n:
-            menu_items.append({'id': i + 1, 'name': n, 'price': int(p or 0)})
+            menu_items.append({'id': i + 1, 'name': n, 'description': d.strip(), 'type': t or 'food'})
     event.menu_json = json.dumps(menu_items, ensure_ascii=False)
 
     # Banner image

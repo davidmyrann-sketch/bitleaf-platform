@@ -15,9 +15,11 @@ def create_app():
     app.config['GOOGLE_CLIENT_ID']     = os.environ.get('GOOGLE_CLIENT_ID', '')
     app.config['GOOGLE_CLIENT_SECRET'] = os.environ.get('GOOGLE_CLIENT_SECRET', '')
 
-    app.config['CLOUDINARY_CLOUD']  = os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbfdriulu')
-    app.config['CLOUDINARY_KEY']    = os.environ.get('CLOUDINARY_API_KEY', '771919697856992')
-    app.config['CLOUDINARY_SECRET'] = os.environ.get('CLOUDINARY_API_SECRET', 'f995Buu7jx1d-pi1bJWpVFrQbG4')
+    app.config['CLOUDINARY_CLOUD']    = os.environ.get('CLOUDINARY_CLOUD_NAME', 'dbfdriulu')
+    app.config['CLOUDINARY_KEY']      = os.environ.get('CLOUDINARY_API_KEY', '771919697856992')
+    app.config['CLOUDINARY_SECRET']   = os.environ.get('CLOUDINARY_API_SECRET', 'f995Buu7jx1d-pi1bJWpVFrQbG4')
+    app.config['STRIPE_SECRET_KEY']   = os.environ.get('STRIPE_SECRET_KEY', '')
+    app.config['STRIPE_WEBHOOK_SECRET'] = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 
     db.init_app(app)
 
@@ -81,6 +83,20 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        # Safe migrations for new columns on existing tables
+        from sqlalchemy import text
+        migrations = [
+            "ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS stripe_session_id TEXT",
+            "ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'pending'",
+            "ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS food_choice TEXT",
+            "ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS drink_choice TEXT",
+        ]
+        for sql in migrations:
+            try:
+                db.session.execute(text(sql))
+            except Exception:
+                db.session.rollback()
+        db.session.commit()
 
     return app
 

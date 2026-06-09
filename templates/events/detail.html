@@ -27,70 +27,125 @@
     </div>
     {% endif %}
 
-    {% if menu %}
+    <!-- Menu -->
+    {% if food_items or drink_items %}
     <div class="card p-4 mb-3">
-      <h5 class="mb-3"><i class="bi bi-fork-knife text-bl me-2"></i>Meny</h5>
-      <ul class="list-group list-group-flush">
-        {% for item in menu %}
-        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-          <span>{{ item.name }}</span>
-          {% if item.price > 0 %}<span class="fw-semibold">{{ item.price }} kr</span>{% else %}<span class="text-muted">Inkl.</span>{% endif %}
-        </li>
-        {% endfor %}
-      </ul>
+      <h5 class="mb-3"><i class="bi bi-journal-text me-2" style="color:var(--bl-orange)"></i>Meny</h5>
+      <div class="row g-4">
+        {% if food_items %}
+        <div class="col-md-6">
+          <h6 class="fw-bold mb-3">🍽 Mat</h6>
+          {% for item in food_items %}
+          <div class="border rounded p-3 mb-2">
+            <div class="fw-semibold">{{ item.name }}</div>
+            {% if item.description %}<div class="small text-muted mt-1">{{ item.description }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if drink_items %}
+        <div class="col-md-6">
+          <h6 class="fw-bold mb-3">🥂 Drikke</h6>
+          {% for item in drink_items %}
+          <div class="border rounded p-3 mb-2">
+            <div class="fw-semibold">{{ item.name }}</div>
+            {% if item.description %}<div class="small text-muted mt-1">{{ item.description }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
     </div>
     {% endif %}
+
+    <!-- Cancellation policy -->
+    <div class="card p-3 mb-3" style="border-left:4px solid var(--bl-orange) !important;border-radius:8px">
+      <div class="small">
+        <i class="bi bi-info-circle me-1" style="color:var(--bl-orange)"></i>
+        <strong>Avbestilling</strong> må sendes på e-post til
+        <a href="mailto:{{ cancel_email }}">{{ cancel_email }}</a>
+        senest <strong>{{ cancel_days }} dager</strong> før arrangementet.
+      </div>
+    </div>
   </div>
 
+  <!-- Booking sidebar -->
   <div class="col-lg-5">
     <div class="card p-4 sticky-top" style="top:80px">
-      <div class="d-flex justify-content-between mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <div class="fs-4 fw-bold">{% if event.price > 0 %}{{ event.price }} kr{% else %}Gratis{% endif %}</div>
-          <small class="text-muted">per person</small>
+          <div class="fs-3 fw-bold" style="color:var(--bl-maroon)">{{ event.price }} kr</div>
+          <small class="text-muted">per person · inkl. mat og drikke</small>
         </div>
         <div class="text-end">
           <div class="fw-semibold {% if event.spots_left > 0 %}text-success{% else %}text-danger{% endif %}">
-            {% if event.spots_left > 0 %}{{ event.spots_left }} plasser igjen{% else %}Fullt{% endif %}
+            {% if event.spots_left > 0 %}{{ event.spots_left }} plasser{% else %}Fullt{% endif %}
           </div>
-          <small class="text-muted">av {{ event.capacity }} total</small>
+          <small class="text-muted">av {{ event.capacity }}</small>
         </div>
       </div>
 
       {% if user_booking %}
-        <div class="alert alert-success mb-0">
-          <i class="bi bi-check-circle me-2"></i>Du er påmeldt!
+        <div class="alert mb-0" style="background:#FFF0D0;border-color:var(--bl-orange);color:var(--bl-maroon)">
+          <i class="bi bi-check-circle-fill me-2"></i><strong>Du er påmeldt!</strong><br>
+          <small>{{ user_booking.food_choice }} + {{ user_booking.drink_choice }}</small>
         </div>
+
       {% elif event.spots_left > 0 %}
-        <form method="post" action="{{ url_for('events.book_event', slug=event.slug) }}">
-          <div class="mb-2">
-            <input name="name" type="text" class="form-control form-control-sm" placeholder="Fullt navn*"
-              value="{{ current_user.name if current_user.is_authenticated else '' }}" required>
-          </div>
-          <div class="mb-2">
-            <input name="email" type="email" class="form-control form-control-sm" placeholder="E-post*"
-              value="{{ current_user.email if current_user.is_authenticated else '' }}" required>
-          </div>
-          <div class="mb-2">
-            <input name="company" type="text" class="form-control form-control-sm" placeholder="Selskap">
-          </div>
+        {% if not food_items or not drink_items %}
+          <div class="alert alert-warning small">Admin må legge til mat- og drikkealternativer i menyen før booking er mulig.</div>
+        {% else %}
+        <form method="post" action="{{ url_for('events.checkout', slug=event.slug) }}" id="bookingForm">
+          <!-- Contact info -->
           <div class="mb-3">
-            <input name="phone" type="tel" class="form-control form-control-sm" placeholder="Telefon">
+            <label class="form-label fw-semibold">Navn *</label>
+            <input name="name" type="text" class="form-control" value="{{ prefill.name }}" required placeholder="Fullt navn">
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Telefon *</label>
+            <input name="phone" type="tel" class="form-control" value="{{ prefill.phone }}" required placeholder="+47...">
           </div>
 
-          {% if menu %}
-          <h6 class="mb-2">Velg fra menyen</h6>
-          {% for item in menu %}
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="small">{{ item.name }}{% if item.price > 0 %} ({{ item.price }} kr){% endif %}</span>
-            <input name="item_{{ item.id }}" type="number" class="form-control form-control-sm" min="0" max="10" value="0" style="width:65px">
+          <!-- Food choice -->
+          <label class="form-label fw-semibold">Velg mat *</label>
+          <div class="mb-3">
+            {% for item in food_items %}
+            <div class="form-check border rounded p-3 mb-2" style="cursor:pointer" onclick="this.querySelector('input').click()">
+              <input class="form-check-input" type="radio" name="food_item" value="{{ item.id }}" id="food_{{ item.id }}" required>
+              <label class="form-check-label w-100" for="food_{{ item.id }}" style="cursor:pointer">
+                <div class="fw-semibold">{{ item.name }}</div>
+                {% if item.description %}<div class="small text-muted">{{ item.description }}</div>{% endif %}
+              </label>
+            </div>
+            {% endfor %}
           </div>
-          {% endfor %}
-          <hr>
-          {% endif %}
 
-          <button type="submit" class="btn btn-bl w-100">Meld meg på</button>
+          <!-- Drink choice -->
+          <label class="form-label fw-semibold">Velg drikke *</label>
+          <div class="mb-4">
+            {% for item in drink_items %}
+            <div class="form-check border rounded p-3 mb-2" style="cursor:pointer" onclick="this.querySelector('input').click()">
+              <input class="form-check-input" type="radio" name="drink_item" value="{{ item.id }}" id="drink_{{ item.id }}" required>
+              <label class="form-check-label w-100" for="drink_{{ item.id }}" style="cursor:pointer">
+                <div class="fw-semibold">{{ item.name }}</div>
+                {% if item.description %}<div class="small text-muted">{{ item.description }}</div>{% endif %}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-3 fw-bold fs-5">
+            <span>Totalt</span>
+            <span style="color:var(--bl-maroon)">{{ event.price }} kr</span>
+          </div>
+
+          <button type="submit" class="btn btn-bl w-100 py-3 fs-5">
+            <i class="bi bi-credit-card me-2"></i>Gå til betaling
+          </button>
+          <p class="text-muted small text-center mt-2 mb-0">Sikker betaling via Stripe</p>
         </form>
+        {% endif %}
+
       {% else %}
         <button class="btn btn-secondary w-100" disabled>Fullt</button>
       {% endif %}

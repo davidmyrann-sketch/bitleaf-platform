@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Påmelding bekreftet · {{ event.title }} · Bitleaf{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-7 col-lg-6 text-center">
+    <div class="card p-5">
+      <div class="mb-3" style="font-size:3rem">✅</div>
+      <h2 class="mb-1" style="color:var(--bl-maroon)">Betaling mottatt!</h2>
+      <p class="text-muted mb-4">Du er påmeldt <strong>{{ event.title }}</strong></p>
+
+      {% if booking %}
+      <div class="card p-3 mb-4 text-start" style="background:#FFF8EE">
+        <div class="row g-2 small">
+          <div class="col-6 text-muted">Navn</div><div class="col-6 fw-semibold">{{ booking.name }}</div>
+          <div class="col-6 text-muted">Mat</div><div class="col-6">{{ booking.food_choice }}</div>
+          <div class="col-6 text-muted">Drikke</div><div class="col-6">{{ booking.drink_choice }}</div>
+          <div class="col-6 text-muted">Betalt</div><div class="col-6 fw-semibold" style="color:var(--bl-maroon)">{{ booking.total_price }} kr</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if event.date %}
+      <div class="mb-3 fw-semibold"><i class="bi bi-clock me-1"></i>{{ event.date.strftime('%d. %B %Y kl. %H:%M') }}</div>
+      {% endif %}
+      {% if event.location %}
+      <div class="mb-4 text-muted"><i class="bi bi-geo-alt me-1"></i>{{ event.location }}{% if event.address %}, {{ event.address }}{% endif %}</div>
+      {% endif %}
+
+      <div class="alert text-start small mb-4" style="background:#FFF0D0;border-color:var(--bl-orange);color:var(--bl-maroon)">
+        <i class="bi bi-info-circle me-1"></i>
+        <strong>Avbestilling:</strong> Send e-post til
+        <a href="mailto:{{ cancel_email }}" style="color:var(--bl-maroon)">{{ cancel_email }}</a>
+        senest <strong>{{ cancel_days }} dager</strong> før arrangementet.
+      </div>
+
+      <a href="{{ url_for('events.event_list') }}" class="btn btn-bl-outline">Se alle events</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
