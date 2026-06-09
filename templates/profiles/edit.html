@@ -153,6 +153,30 @@
         <button type="submit" class="btn btn-bl px-4">Lagre profil</button>
       </div>
     </form>
+
+    <div class="card p-4 mt-4 border border-danger">
+      <h6 class="text-danger mb-2">Slett profil</h6>
+      <p class="small text-muted mb-3">Dette sletter profilen og kontoen din permanent. Kan ikke angres.</p>
+      <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">Slett min profil</button>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title text-danger">Slett profil</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">Er du sikker? Profilen og kontoen din slettes permanent.</div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Avbryt</button>
+            <form method="post" action="{{ url_for('profiles.delete_profile') }}">
+              <button type="submit" class="btn btn-danger">Ja, slett</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

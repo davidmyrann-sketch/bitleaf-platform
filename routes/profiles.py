@@ -148,6 +148,22 @@ def edit_profile():
         roles=ROLES, industries=INDUSTRIES, visibility=VISIBILITY)
 
 
+@profiles_bp.route('/slett-profil', methods=['POST'])
+@login_required
+def delete_profile():
+    profile = current_user.profile
+    if profile:
+        if profile.company:
+            db.session.delete(profile.company)
+        db.session.delete(profile)
+    db.session.delete(current_user)
+    db.session.commit()
+    from flask_login import logout_user
+    logout_user()
+    flash('Profilen din er slettet.', 'info')
+    return redirect(url_for('auth.login'))
+
+
 @profiles_bp.route('/api/brreg/<org_nr>')
 @login_required
 def brreg_api(org_nr):
