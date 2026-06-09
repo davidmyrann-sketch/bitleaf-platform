@@ -144,9 +144,13 @@ def edit_profile():
         flash('Profil oppdatert!', 'success')
         return redirect(url_for('profiles.detail', slug=profile.slug))
 
-    return render_template('profiles/edit.html',
+    from flask import make_response
+    resp = make_response(render_template('profiles/edit.html',
         profile=profile, company=company,
-        roles=ROLES, industries=INDUSTRIES, visibility=VISIBILITY)
+        roles=ROLES, industries=INDUSTRIES, visibility=VISIBILITY))
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+    resp.headers['Pragma'] = 'no-cache'
+    return resp
 
 
 @profiles_bp.route('/slett-profil', methods=['POST'])
