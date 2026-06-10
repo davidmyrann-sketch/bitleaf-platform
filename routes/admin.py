@@ -52,22 +52,24 @@ def users():
 @admin_required
 def create_user():
     from models import Profile
-    email = request.form.get('email', '').strip().lower()
-    name  = request.form.get('name', '').strip()
-    if not email:
-        flash('E-post er påkrevd.', 'danger')
+    from werkzeug.security import generate_password_hash
+    email    = request.form.get('email', '').strip().lower()
+    name     = request.form.get('name', '').strip()
+    password = request.form.get('password', '').strip()
+    if not email or not password:
+        flash('E-post og passord er påkrevd.', 'danger')
         return redirect(url_for('admin.users'))
     if User.query.filter_by(email=email).first():
         flash(f'{email} er allerede registrert.', 'warning')
         return redirect(url_for('admin.users'))
-    user = User(email=email, name=name or email)
+    user = User(email=email, name=name or email, password_hash=generate_password_hash(password))
     db.session.add(user)
     db.session.flush()
     profile = Profile(user_id=user.id)
     profile.slug = profile.make_slug(name or email)
     db.session.add(profile)
     db.session.commit()
-    flash(f'Bruker {email} opprettet. De kan nå logge inn med Google.', 'success')
+    flash(f'Bruker {email} opprettet med passord. De kan logge inn med e-post/passord eller Google.', 'success')
     return redirect(url_for('admin.users'))
 
 

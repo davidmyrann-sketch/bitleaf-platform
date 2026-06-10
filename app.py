@@ -90,6 +90,7 @@ def create_app():
             "ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS payment_status VARCHAR(20) DEFAULT 'pending'",
             "ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS food_choice TEXT",
             "ALTER TABLE event_bookings ADD COLUMN IF NOT EXISTS drink_choice TEXT",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT",
         ]
         for sql in migrations:
             try:

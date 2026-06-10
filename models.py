@@ -47,6 +47,7 @@ class User(UserMixin, db.Model):
     name          = db.Column(db.String(255))
     google_id     = db.Column(db.String(255), unique=True)
     avatar_url    = db.Column(db.Text)
+    password_hash = db.Column(db.Text)
     is_admin      = db.Column(db.Boolean, default=False)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 

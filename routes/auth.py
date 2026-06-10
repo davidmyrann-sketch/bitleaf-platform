@@ -1,7 +1,8 @@
 import os, requests as req
-from flask import Blueprint, redirect, url_for, session, request, flash, current_app
+from flask import Blueprint, redirect, url_for, session, request, flash, current_app, render_template
 from flask_login import login_user, logout_user, login_required, current_user
 from authlib.integrations.flask_client import OAuth
+from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Profile
 
 auth_bp = Blueprint('auth', __name__)
@@ -23,11 +24,23 @@ def on_load(state):
     init_oauth(state.app)
 
 
-@auth_bp.route('/logg-inn')
+@auth_bp.route('/logg-inn', methods=['GET', 'POST'])
 def login():
-    from flask import render_template
     if current_user.is_authenticated:
         return redirect(url_for('profiles.directory'))
+
+    if request.method == 'POST':
+        email    = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        user     = User.query.filter_by(email=email).first()
+        if user and user.password_hash and check_password_hash(user.password_hash, password):
+            login_user(user, remember=True)
+            if not user.profile or not user.profile.role:
+                flash('Velkommen! Fullfør profilen din.', 'info')
+                return redirect(url_for('profiles.edit_profile'))
+            return redirect(url_for('profiles.directory'))
+        flash('Feil e-post eller passord.', 'danger')
+
     return render_template('auth/login.html')
 
 
@@ -73,6 +86,31 @@ def google_callback():
         return redirect(url_for('profiles.edit_profile'))
 
     return redirect(url_for('profiles.directory'))
+
+
+@auth_bp.route('/bytt-passord', methods=['POST'])
+@login_required
+def change_password():
+    current_pw = request.form.get('current_password', '')
+    new_pw     = request.form.get('new_password', '')
+    confirm_pw = request.form.get('confirm_password', '')
+
+    if current_user.password_hash and not check_password_hash(current_user.password_hash, current_pw):
+        flash('Nåværende passord er feil.', 'danger')
+        return redirect(url_for('profiles.edit_profile'))
+
+    if len(new_pw) < 8:
+        flash('Nytt passord må være minst 8 tegn.', 'danger')
+        return redirect(url_for('profiles.edit_profile'))
+
+    if new_pw != confirm_pw:
+        flash('Passordene stemmer ikke overens.', 'danger')
+        return redirect(url_for('profiles.edit_profile'))
+
+    current_user.password_hash = generate_password_hash(new_pw)
+    db.session.commit()
+    flash('Passord endret.', 'success')
+    return redirect(url_for('profiles.edit_profile'))
 
 
 @auth_bp.route('/logg-ut')
