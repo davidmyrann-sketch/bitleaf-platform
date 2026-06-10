@@ -48,6 +48,29 @@ def users():
     return render_template('admin/users.html', users=users)
 
 
+@admin_bp.route('/brukere/ny', methods=['POST'])
+@admin_required
+def create_user():
+    from models import Profile
+    email = request.form.get('email', '').strip().lower()
+    name  = request.form.get('name', '').strip()
+    if not email:
+        flash('E-post er påkrevd.', 'danger')
+        return redirect(url_for('admin.users'))
+    if User.query.filter_by(email=email).first():
+        flash(f'{email} er allerede registrert.', 'warning')
+        return redirect(url_for('admin.users'))
+    user = User(email=email, name=name or email)
+    db.session.add(user)
+    db.session.flush()
+    profile = Profile(user_id=user.id)
+    profile.slug = profile.make_slug(name or email)
+    db.session.add(profile)
+    db.session.commit()
+    flash(f'Bruker {email} opprettet. De kan nå logge inn med Google.', 'success')
+    return redirect(url_for('admin.users'))
+
+
 @admin_bp.route('/brukere/<int:user_id>/toggle-admin', methods=['POST'])
 @admin_required
 def toggle_admin(user_id):
